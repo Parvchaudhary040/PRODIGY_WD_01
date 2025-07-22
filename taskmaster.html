@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List App</title>
+  <style>
+    /* Base styles with transparency */
+    :root {
+      --text-color: rgba(255, 255, 255, 0.9);
+      --text-color-dark: rgba(0, 0, 0, 0.9);
+      --hover-color: rgba(255, 255, 255, 0.2);
+      --indigo-500: rgba(99, 102, 241, 0.7);
+      --emerald-500: rgba(16, 185, 129, 0.7);
+      --rose-500: rgba(244, 63, 94, 0.7);
+      --border-color: rgba(255, 255, 255, 0.2);
+      --progress-bg: rgba(0, 0, 0, 0.2);
+      --progress-fill: white;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-image: url("background.jpg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    /* Main container with slight blur for readability */
+    .app-container {
+      min-height: 100vh;
+      backdrop-filter: blur(2px);
+    }
+
+    /* Header/Navbar */
+    .app-header {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+    }
+    
+    .app-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-align: center; /* Center the text */
+      flex: 1; /* Take available space */
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: inherit;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s;
+      position: absolute; /* Position absolutely */
+      right: 1rem; /* Position from right */
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--hover-color);
+    }
+
+    /* Task Input */
+    .task-input-container {
+      width: 100%;
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .task-input-form {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .task-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-color);
+      font-size: 1rem;
+      backdrop-filter: blur(5px);
+    }
+
+    .task-input:focus {
+      outline: none;
+      border-color: var(--indigo-500);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .add-task-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--indigo-500);
+      color: white;
+      border: none;
+      border-radius: 0.375rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .add-task-btn:hover {
+      background-color: rgba(79, 70, 229, 0.8);
+    }
+
+    /* Task Sections */
+    .task-sections-container {
+      width: 100%;
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 0 1rem 2rem;
+    }
+
+    .task-section {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(5px);
+      border: 1px solid var(--border-color);
+    }
+
+    .task-section h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    /* Progress Bar Styles */
+    .progress-container {
+      width: 100%;
+      max-width: 42rem;
+      margin: 0 auto 1.5rem;
+      padding: 0 1rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 1.5rem;
+      background-color: var(--progress-bg);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--progress-fill);
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 0.5rem;
+      font-size: 0.75rem;
+      color: black;
+      text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .progress-text {
+      margin-top: 0.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Task Items */
+    .task-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      gap: 1rem;
+      transition: all 0.2s;
+    }
+
+    .task-item:hover {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .task-checkbox {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+      accent-color: var(--indigo-500);
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 1rem;
+    }
+
+    .task-text.completed {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .task-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      color: var(--text-color);
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .task-btn:hover {
+      background-color: var(--hover-color);
+    }
+
+    .edit-btn:hover {
+      color: var(--emerald-500);
+      border-color: var(--emerald-500);
+    }
+
+    .delete-btn:hover {
+      color: var(--rose-500);
+      border-color: var(--rose-500);
+    }
+
+    /* Edit Mode Styles */
+    .task-edit-input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-color);
+    }
+
+    .save-btn {
+      background-color: var(--emerald-500);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      background-color: var(--rose-500);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+
+    /* Empty Messages */
+    .empty-message {
+      text-align: center;
+      padding: 1rem;
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    /* Dark mode adjustments */
+    body.dark {
+      --text-color: rgba(255, 255, 255, 0.9);
+      --border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.light {
+      --text-color: rgba(0, 0, 0, 0.9);
+      --border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 640px) {
+      .task-input-form {
+        flex-direction: column;
+      }
+      
+      .add-task-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="dark">
+  <div class="app-container">
+    <div class="flex-col min-h-screen">
+      <header class="app-header">
+        <h1 class="app-title">TASK-MASTER</h1>
+        <button id="themeToggle" class="theme-toggle">
+          <span id="themeIcon">☀️</span> <span id="themeText">Light Mode</span>
+        </button>
+      </header>
+
+      <main class="flex-1 w-full">
+        <!-- Task Input Section -->
+        <section aria-labelledby="add-task-heading" class="pt-4">
+          <div class="task-input-container">
+            <form id="taskInputForm" class="task-input-form">
+              <input
+                type="text"
+                id="taskInput"
+                class="task-input"
+                placeholder="Add a new task..."
+                required
+              />
+              <button type="submit" class="add-task-btn">Add Task</button>
+            </form>
+          </div>
+        </section>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width: 0%">0%</div>
+          </div>
+          <div id="progressText" class="progress-text">0 of 0 tasks completed</div>
+        </div>
+
+        <!-- Task List Sections -->
+        <section class="task-sections-container">
+          <!-- Pending Tasks Section -->
+          <div class="task-section">
+            <h2>Pending Tasks</h2>
+            <ul id="pendingTaskList" class="task-list">
+              <!-- Pending tasks will be added here dynamically -->
+            </ul>
+            <div id="pendingEmptyMessage" class="empty-message">No pending tasks. Add a task to get started!</div>
+          </div>
+
+          <!-- Completed Tasks Section -->
+          <div class="task-section">
+            <h2>Completed Tasks</h2>
+            <ul id="completedTaskList" class="task-list">
+              <!-- Completed tasks will be added here dynamically -->
+            </ul>
+            <div id="completedEmptyMessage" class="empty-message">No completed tasks yet.</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Initial tasks
+    const initialTasks = [
+    ];
+
+    // DOM elements
+    const pendingTaskList = document.getElementById('pendingTaskList');
+    const completedTaskList = document.getElementById('completedTaskList');
+    const pendingEmptyMessage = document.getElementById('pendingEmptyMessage');
+    const completedEmptyMessage = document.getElementById('completedEmptyMessage');
+    const taskInputForm = document.getElementById('taskInputForm');
+    const taskInput = document.getElementById('taskInput');
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    const body = document.body;
+
+    // State
+    let tasks = [...initialTasks];
+    let isDarkMode = true; // Start in dark mode
+
+    // Initialize the app
+    function init() {
+      renderTasks();
+      setupEventListeners();
+    }
+
+    // Set up event listeners
+    function setupEventListeners() {
+      taskInputForm.addEventListener('submit', handleAddTask);
+      themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    // Render all tasks in their respective sections
+    function renderTasks() {
+      // Clear both lists
+      pendingTaskList.innerHTML = '';
+      completedTaskList.innerHTML = '';
+      
+      // Separate tasks into pending and completed
+      const pendingTasks = tasks.filter(task => !task.completed);
+      const completedTasks = tasks.filter(task => task.completed);
+
+      // Show/hide empty messages
+      pendingEmptyMessage.style.display = pendingTasks.length === 0 ? 'block' : 'none';
+      completedEmptyMessage.style.display = completedTasks.length === 0 ? 'block' : 'none';
+
+      // Render pending tasks
+      pendingTasks.forEach(task => {
+        const taskItem = createTaskElement(task);
+        pendingTaskList.appendChild(taskItem);
+      });
+
+      // Render completed tasks
+      completedTasks.forEach(task => {
+        const taskItem = createTaskElement(task);
+        completedTaskList.appendChild(taskItem);
+      });
+    }
+     // Render all tasks in their respective sections
+    function renderTasks() {
+      // Clear both lists
+      pendingTaskList.innerHTML = '';
+      completedTaskList.innerHTML = '';
+      
+      // Separate tasks into pending and completed
+      const pendingTasks = tasks.filter(task => !task.completed);
+      const completedTasks = tasks.filter(task => task.completed);
+
+      // Show/hide empty messages
+      pendingEmptyMessage.style.display = pendingTasks.length === 0 ? 'block' : 'none';
+      completedEmptyMessage.style.display = completedTasks.length === 0 ? 'block' : 'none';
+
+      // Render pending tasks
+      pendingTasks.forEach(task => {
+        const taskItem = createTaskElement(task);
+        pendingTaskList.appendChild(taskItem);
+      });
+
+      // Render completed tasks
+      completedTasks.forEach(task => {
+        const taskItem = createTaskElement(task);
+        completedTaskList.appendChild(taskItem);
+      });
+
+      // Update progress bar
+      updateProgressBar();
+    }
+
+    // Update progress bar
+    function updateProgressBar() {
+      const totalTasks = tasks.length;
+      const completedTasks = tasks.filter(task => task.completed).length;
+      const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      
+      progressFill.style.width = `${progressPercentage}%`;
+      progressFill.textContent = `${progressPercentage}%`;
+      progressText.textContent = `${completedTasks} of ${totalTasks} tasks completed`;
+    }
+
+
+    // Create a task element
+    function createTaskElement(task) {
+      const taskItem = document.createElement('li');
+      taskItem.className = 'task-item';
+      taskItem.dataset.id = task.id;
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'task-checkbox';
+      checkbox.checked = task.completed;
+      checkbox.addEventListener('change', () => handleToggleTask(task.id));
+
+      const taskText = document.createElement('span');
+      taskText.className = `task-text ${task.completed ? 'completed' : ''}`;
+      taskText.textContent = task.text;
+
+      const taskActions = document.createElement('div');
+      taskActions.className = 'task-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'task-btn edit-btn';
+      editBtn.innerHTML = '✏️';
+      editBtn.title = 'Edit';
+      editBtn.addEventListener('click', () => handleEditTask(task.id));
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'task-btn delete-btn';
+      deleteBtn.innerHTML = '🗑️';
+      deleteBtn.title = 'Delete';
+      deleteBtn.addEventListener('click', () => handleDeleteTask(task.id));
+
+      taskActions.appendChild(editBtn);
+      taskActions.appendChild(deleteBtn);
+
+      taskItem.appendChild(checkbox);
+      taskItem.appendChild(taskText);
+      taskItem.appendChild(taskActions);
+
+      return taskItem;
+    }
+
+    // Handle adding a new task
+    function handleAddTask(e) {
+      e.preventDefault();
+      
+      const taskText = taskInput.value.trim();
+      if (!taskText) return;
+
+      const newTask = {
+        id: crypto.randomUUID(),
+        text: taskText,
+        completed: false
+      };
+
+      tasks = [newTask, ...tasks];
+      renderTasks();
+      taskInput.value = '';
+      taskInput.focus();
+    }
+
+    // Handle toggling task completion
+    function handleToggleTask(taskId) {
+      tasks = tasks.map(task => 
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      );
+      renderTasks();
+    }
+
+    // Handle editing a task
+    function handleEditTask(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      // Find the task item in the DOM (could be in either list)
+      const taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
+      if (!taskItem) return;
+
+      // Replace text with input field
+      const taskText = taskItem.querySelector('.task-text');
+      const originalText = taskText.textContent;
+
+      const editForm = document.createElement('div');
+      editForm.style.display = 'flex';
+      editForm.style.gap = '0.5rem';
+      editForm.style.width = '100%';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'task-edit-input';
+      input.value = originalText;
+      input.focus();
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'save-btn';
+      saveBtn.textContent = 'Save';
+      saveBtn.addEventListener('click', () => {
+        const newText = input.value.trim();
+        if (newText) {
+          tasks = tasks.map(t => 
+            t.id === taskId ? { ...t, text: newText } : t
+          );
+          renderTasks();
+        }
+      });
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'cancel-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.addEventListener('click', () => {
+        renderTasks();
+      });
+
+      editForm.appendChild(input);
+      editForm.appendChild(saveBtn);
+      editForm.appendChild(cancelBtn);
+
+      // Replace the task text and actions with the edit form
+      taskText.replaceWith(editForm);
+    }
+
+    // Handle deleting a task
+    function handleDeleteTask(taskId) {
+      tasks = tasks.filter(task => task.id !== taskId);
+      renderTasks();
+    }
+
+    // Toggle between light and dark theme
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      
+      if (isDarkMode) {
+        body.classList.remove('light');
+        body.classList.add('dark');
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light Mode';
+      } else {
+        body.classList.remove('dark');
+        body.classList.add('light');
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark Mode';
+      }
+    }
+
+    // Initialize the app when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
